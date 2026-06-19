@@ -67,3 +67,29 @@ export async function POST(req) {
     return NextResponse.json({ error: 'Failed to create tournament' }, { status: 500 });
   }
 }
+
+// DELETE /api/tournaments
+export async function DELETE(req) {
+  try {
+    const admin = getAdminFromRequest(req);
+    if (!admin) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ error: 'Missing tournament ID' }, { status: 400 });
+    }
+
+    await db.tournament.delete({
+      where: { id }
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting tournament:', error);
+    return NextResponse.json({ error: 'Failed to delete tournament' }, { status: 500 });
+  }
+}

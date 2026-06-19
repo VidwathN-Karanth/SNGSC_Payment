@@ -22,6 +22,49 @@ export default function AdminDashboard() {
   
   const [creating, setCreating] = useState(false);
 
+  // Delete Modal State
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [tournamentToDelete, setTournamentToDelete] = useState(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+
+  const openDeleteModal = (t) => {
+    setTournamentToDelete(t);
+    setDeleteConfirmText('');
+    setShowDeleteModal(true);
+  };
+
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    setTournamentToDelete(null);
+    setDeleteConfirmText('');
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!tournamentToDelete || deleteConfirmText !== 'delete tournament' || deleting) return;
+    setDeleting(true);
+    setError('');
+
+    try {
+      const res = await fetch(`/api/tournaments?id=${tournamentToDelete.id}`, {
+        method: 'DELETE'
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to delete tournament');
+      }
+
+      await fetchTournaments();
+      closeDeleteModal();
+    } catch (err) {
+      setError(err.message);
+      closeDeleteModal();
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const handleAddCategory = () => {
     setCategories([...categories, { name: '', fee: '' }]);
   };
@@ -418,6 +461,13 @@ export default function AdminDashboard() {
                               >
                                 🔗 Link
                               </Link>
+                              <button 
+                                onClick={() => openDeleteModal(t)}
+                                className="btn btn-secondary"
+                                style={{ padding: '0.4rem 0.75rem', fontSize: '0.8rem', color: 'var(--error)', borderColor: 'var(--error)', backgroundColor: 'transparent', textAlign: 'center' }}
+                              >
+                                🗑️ Delete
+                              </button>
                             </div>
                           </td>
                         </tr>
@@ -436,6 +486,62 @@ export default function AdminDashboard() {
           <p>© {new Date().getFullYear()} Sri Narayana Guru School of Chess. Organizer Dashboard.</p>
         </div>
       </footer>
+
+      {showDeleteModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.4)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          padding: '1.5rem'
+        }}>
+          <div className="glass-card" style={{ maxWidth: '500px', width: '100%', padding: '2rem', borderRadius: 'var(--radius-lg)', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
+            <h3 style={{ fontSize: '1.5rem', color: 'var(--error)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              ⚠️ Delete Tournament?
+            </h3>
+            <p style={{ fontSize: '0.95rem', color: 'var(--text-secondary)', marginBottom: '1.5rem', lineHeight: '1.6' }}>
+              Are you sure you want to permanently delete <strong>{tournamentToDelete?.name}</strong>? This action is irreversible. All confirmed player registrations, transaction records, and payment associations will be deleted forever.
+            </p>
+            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+              <label className="form-label" htmlFor="delete-confirm-input" style={{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-primary)' }}>
+                To confirm, type <span style={{ color: 'var(--error)', fontWeight: 'bold' }}>"delete tournament"</span> below:
+              </label>
+              <input 
+                type="text" 
+                id="delete-confirm-input"
+                className="form-input" 
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="Type here..."
+                autoComplete="off"
+                style={{ width: '100%', marginTop: '0.5rem' }}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+              <button 
+                onClick={closeDeleteModal} 
+                className="btn btn-secondary"
+                style={{ padding: '0.6rem 1.25rem' }}
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={handleConfirmDelete} 
+                className="btn btn-primary"
+                style={{ backgroundColor: 'var(--error)', borderColor: 'var(--error)', color: '#ffffff', padding: '0.6rem 1.25rem' }}
+                disabled={deleteConfirmText !== 'delete tournament' || deleting}
+              >
+                {deleting ? 'Deleting...' : 'Permanently Delete 🗑️'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
