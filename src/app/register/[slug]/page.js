@@ -37,7 +37,8 @@ export default async function RegisterPage(context) {
       <header className="header">
         <div className="container header-inner">
           <Link href="/" className="logo">
-            ♟️ Chess<span>Register</span>
+            <img src="/logo.jpg" alt="Sri Narayana Guru School of Chess Logo" />
+            <span>Sri Narayana Guru School of Chess</span>
           </Link>
           <Link href="/" className="btn btn-secondary" style={{ padding: '0.5rem 1.25rem', fontSize: '0.875rem' }}>
             ← Back to Home
@@ -47,7 +48,7 @@ export default async function RegisterPage(context) {
 
       <main className="container" style={{ marginTop: '3rem', marginBottom: '5rem', maxWidth: '800px' }}>
         <div className="glass-card" style={{ marginBottom: '2rem' }}>
-          <h1 style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>{tournament.name}</h1>
+          <h1 style={{ fontSize: '2rem', marginBottom: '0.75rem', color: 'var(--text-primary)' }}>{tournament.name}</h1>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', color: 'var(--text-secondary)', fontSize: '0.95rem' }}>
             <div>
               <span style={{ marginRight: '0.375rem' }}>🏷️</span> Entry Fee: <strong style={{ color: 'var(--text-primary)' }}>₹{(tournament.entryFee / 100).toFixed(2)}</strong>

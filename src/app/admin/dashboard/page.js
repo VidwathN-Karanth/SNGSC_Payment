@@ -133,7 +133,9 @@ export default function AdminDashboard() {
       <header className="header">
         <div className="container header-inner">
           <Link href="/" className="logo">
-            ♟️ Chess<span>Register</span> <small style={{ fontSize: '0.75rem', opacity: 0.7, marginLeft: '0.5rem', border: '1px solid var(--border-color)', padding: '0.125rem 0.5rem', borderRadius: '4px' }}>ORGANIZER</small>
+            <img src="/logo.jpg" alt="Sri Narayana Guru School of Chess Logo" />
+            <span>Sri Narayana Guru School of Chess</span>
+            <small style={{ fontSize: '0.75rem', opacity: 0.7, marginLeft: '0.5rem', border: '1px solid var(--border-color)', padding: '0.125rem 0.5rem', borderRadius: '4px', color: 'var(--text-secondary)' }}>ORGANIZER</small>
           </Link>
           <button onClick={handleLogout} className="btn btn-secondary" style={{ padding: '0.5rem 1.25rem', fontSize: '0.875rem' }}>
             Logout 🚪
@@ -142,12 +144,12 @@ export default function AdminDashboard() {
       </header>
 
       <main className="container" style={{ marginTop: '3rem', marginBottom: '5rem' }}>
-        <h1 style={{ fontSize: '2.25rem', marginBottom: '2rem' }}>Dashboard Overview</h1>
+        <h1 style={{ fontSize: '2.25rem', marginBottom: '2rem', color: 'var(--text-primary)' }}>Dashboard Overview</h1>
 
         {error && (
           <div style={{
-            backgroundColor: 'rgba(244, 63, 94, 0.1)',
-            border: '1px solid rgba(244, 63, 94, 0.2)',
+            backgroundColor: 'rgba(239, 68, 68, 0.05)',
+            border: '1px solid rgba(239, 68, 68, 0.1)',
             color: 'var(--error)',
             padding: '1rem',
             borderRadius: 'var(--radius-md)',
@@ -162,22 +164,22 @@ export default function AdminDashboard() {
         <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
           <div className="glass-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
             <span style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem' }}>🏆</span>
-            <div style={{ fontSize: '2.5rem', fontWeight: '800', fontFamily: 'var(--font-display)' }}>{totalTournaments}</div>
+            <div style={{ fontSize: '2.5rem', fontWeight: '800', fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>{totalTournaments}</div>
             <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: '600' }}>Active Tournaments</div>
           </div>
           <div className="glass-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
             <span style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem' }}>👥</span>
-            <div style={{ fontSize: '2.5rem', fontWeight: '800', fontFamily: 'var(--font-display)' }}>{totalRegistrations}</div>
+            <div style={{ fontSize: '2.5rem', fontWeight: '800', fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>{totalRegistrations}</div>
             <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: '600' }}>Confirmed Players</div>
           </div>
           <div className="glass-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
             <span style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem' }}>💰</span>
-            <div style={{ fontSize: '2.5rem', fontWeight: '800', fontFamily: 'var(--font-display)', color: 'var(--accent)' }}>₹{totalRevenue.toLocaleString()}</div>
+            <div style={{ fontSize: '2.5rem', fontWeight: '800', fontFamily: 'var(--font-display)', color: 'var(--primary)' }}>₹{totalRevenue.toLocaleString()}</div>
             <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: '600' }}>Entry Fees Collected</div>
           </div>
           <div className="glass-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
             <span style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem' }}>📈</span>
-            <div style={{ fontSize: '2.5rem', fontWeight: '800', fontFamily: 'var(--font-display)' }}>
+            <div style={{ fontSize: '2.5rem', fontWeight: '800', fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
               {totalCapacity > 0 ? Math.round((totalRegistrations / totalCapacity) * 100) : 0}%
             </div>
             <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: '600' }}>Capacity Occupancy</div>
@@ -187,7 +189,7 @@ export default function AdminDashboard() {
         <div className="grid-2">
           {/* Tournament Creation Form */}
           <section className="glass-card" style={{ height: 'fit-content' }}>
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem', color: 'var(--text-primary)' }}>
               Create New Tournament
             </h2>
             <form onSubmit={handleCreateTournament}>
@@ -197,7 +199,7 @@ export default function AdminDashboard() {
                   type="text" 
                   id="t-name" 
                   className="form-input" 
-                  placeholder="e.g. Chess Masters Cup 2026"
+                  placeholder="e.g. SNG Masters Cup 2026"
                   value={name}
                   onChange={(e) => handleNameChange(e.target.value)}
                   required
@@ -210,7 +212,7 @@ export default function AdminDashboard() {
                   type="text" 
                   id="t-slug" 
                   className="form-input" 
-                  placeholder="e.g. chess-masters-cup-2026"
+                  placeholder="e.g. sng-masters-cup-2026"
                   value={slug}
                   onChange={(e) => setSlug(e.target.value)}
                   required
@@ -276,7 +278,7 @@ export default function AdminDashboard() {
 
           {/* Tournaments List Table */}
           <section className="glass-card" style={{ display: 'flex', flexDirection: 'column' }}>
-            <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
+            <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem', color: 'var(--text-primary)' }}>
               Manage Tournaments
             </h2>
             
@@ -302,11 +304,11 @@ export default function AdminDashboard() {
                           <td>
                             <strong style={{ display: 'block', color: 'var(--text-primary)' }}>{t.name}</strong>
                             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>/{t.slug}</span>
-                            <span style={{ display: 'block', fontSize: '0.85rem', color: 'var(--accent)', marginTop: '0.25rem' }}>
+                            <span style={{ display: 'block', fontSize: '0.85rem', color: 'var(--primary)', marginTop: '0.25rem', fontWeight: '600' }}>
                               ₹{(t.entryFee / 100).toFixed(2)}
                             </span>
                           </td>
-                          <td style={{ fontWeight: '600' }}>
+                          <td style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
                             {count} / {t.capacity}
                           </td>
                           <td>
@@ -341,7 +343,7 @@ export default function AdminDashboard() {
 
       <footer className="footer">
         <div className="container">
-          <p>© {new Date().getFullYear()} ChessRegister. Tournament Organizer Panel.</p>
+          <p>© {new Date().getFullYear()} Sri Narayana Guru School of Chess. Organizer Dashboard.</p>
         </div>
       </footer>
     </>

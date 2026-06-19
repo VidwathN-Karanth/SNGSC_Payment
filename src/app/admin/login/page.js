@@ -30,7 +30,7 @@ export default function AdminLoginPage() {
 
       // Login success, redirect to dashboard
       router.push('/admin/dashboard');
-      router.refresh(); // Refresh state so middleware captures cookie change
+      router.refresh(); // Refresh state so middleware/proxy captures cookie change
     } catch (err) {
       console.error('Login error:', err);
       setError(err.message);
@@ -44,7 +44,8 @@ export default function AdminLoginPage() {
       <header className="header">
         <div className="container header-inner">
           <Link href="/" className="logo">
-            ♟️ Chess<span>Register</span>
+            <img src="/logo.jpg" alt="Sri Narayana Guru School of Chess Logo" />
+            <span>Sri Narayana Guru School of Chess</span>
           </Link>
           <Link href="/" className="btn btn-secondary" style={{ padding: '0.5rem 1.25rem', fontSize: '0.875rem' }}>
             ← Home
@@ -54,15 +55,15 @@ export default function AdminLoginPage() {
 
       <main style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 12rem)', padding: '2rem 1.5rem' }}>
         <div className="glass-card" style={{ maxWidth: '440px', width: '100%', padding: '2.5rem' }}>
-          <h1 style={{ fontSize: '1.85rem', marginBottom: '0.5rem', textAlign: 'center' }}>Admin Login</h1>
+          <h1 style={{ fontSize: '1.85rem', marginBottom: '0.5rem', textAlign: 'center', color: 'var(--text-primary)' }}>Admin Login</h1>
           <p style={{ color: 'var(--text-secondary)', textAlign: 'center', marginBottom: '2rem', fontSize: '0.95rem' }}>
             Enter your credentials to access the organizer control panel.
           </p>
 
           {error && (
             <div style={{
-              backgroundColor: 'rgba(244, 63, 94, 0.1)',
-              border: '1px solid rgba(244, 63, 94, 0.2)',
+              backgroundColor: 'rgba(239, 68, 68, 0.05)',
+              border: '1px solid rgba(239, 68, 68, 0.1)',
               color: 'var(--error)',
               padding: '0.75rem 1rem',
               borderRadius: 'var(--radius-md)',
@@ -122,7 +123,7 @@ export default function AdminLoginPage() {
 
       <footer className="footer">
         <div className="container">
-          <p>© {new Date().getFullYear()} ChessRegister. Admin Area.</p>
+          <p>© {new Date().getFullYear()} Sri Narayana Guru School of Chess. Admin Area.</p>
         </div>
       </footer>
     </>
