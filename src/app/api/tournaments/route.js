@@ -64,7 +64,7 @@ export async function POST(req) {
     return NextResponse.json(tournament, { status: 201 });
   } catch (error) {
     console.error('Error creating tournament:', error);
-    return NextResponse.json({ error: 'Failed to create tournament' }, { status: 500 });
+    return NextResponse.json({ error: `Failed to create tournament: ${error.message || error}` }, { status: 500 });
   }
 }
 
