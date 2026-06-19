@@ -76,18 +76,6 @@ export async function POST(req) {
         }
       }
 
-      // Count existing CONFIRMED registrations
-      const confirmedCount = await tx.registration.count({
-        where: {
-          tournamentId: tournament.id,
-          status: 'CONFIRMED'
-        }
-      });
-
-      if (confirmedCount >= tournament.capacity) {
-        throw new Error('Tournament capacity has been reached');
-      }
-
       // Generate order ID
       const orderId = `CHESS-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
 

@@ -28,8 +28,7 @@ export default async function RegisterPage(context) {
   }
 
   const confirmedCount = tournament._count.registrations;
-  const isFull = confirmedCount >= tournament.capacity;
-  const isOpen = tournament.isOpen && !isFull;
+  const isOpen = tournament.isOpen;
   const cashfreeMode = process.env.CASHFREE_MODE || 'sandbox';
 
   return (
@@ -54,19 +53,15 @@ export default async function RegisterPage(context) {
               <span style={{ marginRight: '0.375rem' }}>🏷️</span> Entry Fee: <strong style={{ color: 'var(--text-primary)' }}>₹{(tournament.entryFee / 100).toFixed(2)}</strong>
             </div>
             <div>
-              <span style={{ marginRight: '0.375rem' }}>👥</span> Slots Filled: <strong style={{ color: 'var(--text-primary)' }}>{confirmedCount} / {tournament.capacity}</strong>
+              <span style={{ marginRight: '0.375rem' }}>👥</span> Registered Players: <strong style={{ color: 'var(--text-primary)' }}>{confirmedCount}</strong>
             </div>
           </div>
         </div>
 
         {!isOpen ? (
           <div className="glass-card" style={{ textAlign: 'center', borderColor: 'var(--error)' }}>
-            <h2 style={{ color: 'var(--error)', marginBottom: '0.5rem' }}>Registration Unavailable</h2>
-            <p>
-              {isFull 
-                ? 'We are sorry, but all seats for this tournament have been filled.' 
-                : 'This tournament is no longer accepting registrations.'}
-            </p>
+            <h2 style={{ color: 'var(--error)', marginBottom: '0.5rem' }}>Registration Closed</h2>
+            <p>This tournament is no longer accepting registrations.</p>
             <Link href="/" className="btn btn-primary" style={{ marginTop: '1.5rem' }}>
               View Other Tournaments
             </Link>

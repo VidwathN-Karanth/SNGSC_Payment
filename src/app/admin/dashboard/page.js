@@ -15,7 +15,7 @@ export default function AdminDashboard() {
   const [slug, setSlug] = useState('');
   const [entryFee, setEntryFee] = useState('500'); // Fallback entry fee default
   const [categoryFeesInput, setCategoryFeesInput] = useState('{\n  "Open": 700,\n  "Age Category": 600\n}');
-  const [capacity, setCapacity] = useState('100');
+  const [capacity, setCapacity] = useState('999999');
   const [formSchema, setFormSchema] = useState(JSON.stringify([
     { key: 'fideId', label: 'FIDE ID (optional)', type: 'text', required: false },
     { key: 'club', label: 'Chess Club Name', type: 'text', required: true },
@@ -114,7 +114,7 @@ export default function AdminDashboard() {
       setName('');
       setSlug('');
       setEntryFee('500');
-      setCapacity('100');
+      setCapacity('999999');
       setCategoryFeesInput('{\n  "Open": 700,\n  "Age Category": 600\n}');
       await fetchTournaments();
 
@@ -140,7 +140,6 @@ export default function AdminDashboard() {
   const totalTournaments = tournaments.length;
   const totalRegistrations = tournaments.reduce((acc, t) => acc + (t._count?.registrations || 0), 0);
   const totalRevenue = tournaments.reduce((acc, t) => acc + ((t._count?.registrations || 0) * t.entryFee), 0) / 100;
-  const totalCapacity = tournaments.reduce((acc, t) => acc + t.capacity, 0);
 
   if (loading) {
     return (
@@ -198,13 +197,6 @@ export default function AdminDashboard() {
             <span style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem' }}>💰</span>
             <div style={{ fontSize: '2.5rem', fontWeight: '800', fontFamily: 'var(--font-display)', color: 'var(--primary)' }}>₹{totalRevenue.toLocaleString()}</div>
             <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: '600' }}>Entry Fees Collected</div>
-          </div>
-          <div className="glass-card" style={{ padding: '1.5rem', textAlign: 'center' }}>
-            <span style={{ fontSize: '2rem', display: 'block', marginBottom: '0.5rem' }}>📈</span>
-            <div style={{ fontSize: '2.5rem', fontWeight: '800', fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
-              {totalCapacity > 0 ? Math.round((totalRegistrations / totalCapacity) * 100) : 0}%
-            </div>
-            <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', fontWeight: '600' }}>Capacity Occupancy</div>
           </div>
         </section>
 
@@ -268,20 +260,6 @@ export default function AdminDashboard() {
                 <small style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
                   Format: JSON map. Leave empty for single base entry fee.
                 </small>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label" htmlFor="t-cap">Capacity Limit (Players)</label>
-                <input 
-                  type="number" 
-                  id="t-cap" 
-                  className="form-input" 
-                  placeholder="100"
-                  value={capacity}
-                  onChange={(e) => setCapacity(e.target.value)}
-                  required
-                  min="1"
-                />
               </div>
 
               <div className="form-group">
@@ -356,7 +334,7 @@ export default function AdminDashboard() {
                             )}
                           </td>
                           <td style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
-                            {count} / {t.capacity}
+                            {count}
                           </td>
                           <td>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>

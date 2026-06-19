@@ -61,15 +61,13 @@ export default async function HomePage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: '2rem' }}>
               {tournaments.map((tournament) => {
                 const confirmedCount = tournament._count.registrations;
-                const isFull = confirmedCount >= tournament.capacity;
-                const isOpen = tournament.isOpen && !isFull;
-                const fillPercentage = Math.min(100, Math.round((confirmedCount / tournament.capacity) * 100));
+                const isOpen = tournament.isOpen;
 
                 return (
                   <div key={tournament.id} className="glass-card" style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '2rem' }}>
                     <div className="flex-between" style={{ marginBottom: '1rem' }}>
                       <span className={`badge ${isOpen ? 'badge-confirmed' : 'badge-failed'}`}>
-                        {isOpen ? 'Registration Open' : isFull ? 'Sold Out' : 'Closed'}
+                        {isOpen ? 'Registration Open' : 'Closed'}
                       </span>
                       <span style={{ fontWeight: '700', color: 'var(--primary)', fontSize: '1.25rem', fontFamily: 'var(--font-display)' }}>
                         ₹{(tournament.entryFee / 100).toFixed(0)}
@@ -80,22 +78,11 @@ export default async function HomePage() {
                       {tournament.name}
                     </h3>
 
-                    {/* Progress Bar */}
-                    <div style={{ margin: '1.5rem 0' }}>
-                      <div className="flex-between" style={{ fontSize: '0.85rem', marginBottom: '0.5rem', fontWeight: '600' }}>
-                        <span style={{ color: 'var(--text-secondary)' }}>Capacity Filled</span>
-                        <span style={{ color: 'var(--text-primary)' }}>{confirmedCount} / {tournament.capacity} Players</span>
-                      </div>
-                      <div style={{ width: '100%', height: '8px', backgroundColor: '#e2e8f0', borderRadius: '9999px', overflow: 'hidden' }}>
-                        <div style={{ 
-                          width: `${fillPercentage}%`, 
-                          height: '100%', 
-                          background: isFull 
-                            ? 'linear-gradient(90deg, #ef4444, #dc2626)' 
-                            : 'linear-gradient(90deg, #2563eb, #3b82f6)', 
-                          borderRadius: '9999px',
-                          transition: 'width 0.5s ease'
-                        }} />
+                    {/* Participant Count */}
+                    <div style={{ margin: '1.25rem 0' }}>
+                      <div className="flex-between" style={{ fontSize: '0.9rem', fontWeight: '600' }}>
+                        <span style={{ color: 'var(--text-secondary)' }}>👥 Registered Players</span>
+                        <span style={{ color: 'var(--text-primary)' }}>{confirmedCount}</span>
                       </div>
                     </div>
 
@@ -106,7 +93,7 @@ export default async function HomePage() {
                         </Link>
                       ) : (
                         <button className="btn btn-secondary" style={{ width: '100%' }} disabled>
-                          {isFull ? 'Sold Out' : 'Registration Closed'}
+                          Registration Closed
                         </button>
                       )}
                     </div>
