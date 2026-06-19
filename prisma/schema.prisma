@@ -1,0 +1,45 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Tournament {
+  id            String         @id @default(uuid())
+  name          String
+  slug          String         @unique
+  entryFee      Int            // In paise (e.g. 50000 paise = 500.00 INR)
+  capacity      Int            // Max player limit
+  isOpen        Boolean        @default(true)
+  formSchema    String         // JSON string for dynamic fields config
+  createdAt     DateTime       @default(now())
+  registrations Registration[]
+}
+
+model Registration {
+  id            String          @id @default(uuid())
+  tournamentId  String
+  tournament    Tournament      @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  status        String          // "PENDING" | "CONFIRMED" | "FAILED" | "EXPIRED"
+  playerName    String
+  phone         String
+  email         String
+  extraFields   String          // JSON string storing answers to dynamic fields
+  orderId       String          @unique // Cashfree order_id
+  paymentId     String?         // Cashfree payment_id
+  amountPaid    Int             // in paise
+  createdAt     DateTime        @default(now())
+  confirmedAt   DateTime?
+
+  @@index([tournamentId, status])
+}
+
+model AdminUser {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+}
