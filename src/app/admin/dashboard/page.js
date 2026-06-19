@@ -14,15 +14,31 @@ export default function AdminDashboard() {
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
   const [entryFee, setEntryFee] = useState('500'); // Fallback entry fee default
-  const [categoryFeesInput, setCategoryFeesInput] = useState('{\n  "Open": 700,\n  "Age Category": 600\n}');
   const [capacity, setCapacity] = useState('999999');
-  const [formSchema, setFormSchema] = useState(JSON.stringify([
-    { key: 'fideId', label: 'FIDE ID (optional)', type: 'text', required: false },
-    { key: 'club', label: 'Chess Club Name', type: 'text', required: true },
-    { key: 'ageCategory', label: 'Age Group', type: 'select', options: ['Under 11', 'Under 15', 'Open'], required: true }
-  ], null, 2));
+  
+  // Category-based fee state
+  const [useCategories, setUseCategories] = useState(false);
+  const [categories, setCategories] = useState([{ name: 'Open', fee: '700' }]);
   
   const [creating, setCreating] = useState(false);
+
+  const handleAddCategory = () => {
+    setCategories([...categories, { name: '', fee: '' }]);
+  };
+
+  const handleRemoveCategory = (index) => {
+    setCategories(categories.filter((_, i) => i !== index));
+  };
+
+  const handleCategoryChange = (index, field, value) => {
+    const updated = categories.map((cat, i) => {
+      if (i === index) {
+        return { ...cat, [field]: value };
+      }
+      return cat;
+    });
+    setCategories(updated);
+  };
 
   // Fetch Tournaments & Stats
   const fetchTournaments = async () => {
@@ -61,31 +77,40 @@ export default function AdminDashboard() {
 
     setError('');
     
-    // Validation
-    try {
-      JSON.parse(formSchema);
-    } catch (e) {
-      setError('Form Schema must be valid JSON');
-      return;
-    }
-
     let parsedCategoryFees = null;
-    if (categoryFeesInput.trim()) {
-      try {
-        const temp = JSON.parse(categoryFeesInput);
-        const converted = {};
-        for (const key in temp) {
-          const numericVal = parseFloat(temp[key]);
-          if (isNaN(numericVal)) {
-            throw new Error(`Value for "${key}" is not a valid number`);
-          }
-          converted[key] = Math.round(numericVal * 100); // convert to paise
-        }
-        parsedCategoryFees = JSON.stringify(converted);
-      } catch (e) {
-        setError(`Category Fees must be valid JSON: ${e.message}`);
+    let finalEntryFeePaise = 0;
+
+    if (useCategories) {
+      if (categories.length === 0) {
+        setError('Please add at least one category.');
         return;
       }
+      
+      const converted = {};
+      for (const cat of categories) {
+        if (!cat.name.trim()) {
+          setError('Category name cannot be empty');
+          return;
+        }
+        const numericVal = parseFloat(cat.fee);
+        if (isNaN(numericVal) || numericVal < 0) {
+          setError(`Value for category "${cat.name}" is not a valid number`);
+          return;
+        }
+        converted[cat.name.trim()] = Math.round(numericVal * 100); // convert to paise
+      }
+      parsedCategoryFees = JSON.stringify(converted);
+
+      // Set base entry fee to the first category's fee (required by DB non-null check)
+      const firstFee = parseFloat(categories[0].fee);
+      finalEntryFeePaise = Math.round(firstFee * 100);
+    } else {
+      const numericFee = parseFloat(entryFee);
+      if (isNaN(numericFee) || numericFee < 0) {
+        setError('Base Entry Fee must be a valid number');
+        return;
+      }
+      finalEntryFeePaise = Math.round(numericFee * 100);
     }
 
     setCreating(true);
@@ -97,10 +122,10 @@ export default function AdminDashboard() {
         body: JSON.stringify({
           name,
           slug,
-          entryFee: Math.round(parseFloat(entryFee) * 100), // convert to paise
+          entryFee: finalEntryFeePaise,
           categoryFees: parsedCategoryFees,
           capacity: parseInt(capacity, 10),
-          formSchema,
+          formSchema: JSON.stringify([]), // Default to empty array for now
           isOpen: true
         })
       });
@@ -115,7 +140,8 @@ export default function AdminDashboard() {
       setSlug('');
       setEntryFee('500');
       setCapacity('999999');
-      setCategoryFeesInput('{\n  "Open": 700,\n  "Age Category": 600\n}');
+      setUseCategories(false);
+      setCategories([{ name: 'Open', fee: '700' }]);
       await fetchTournaments();
 
     } catch (err) {
@@ -233,46 +259,85 @@ export default function AdminDashboard() {
                 />
               </div>
 
-              <div className="form-group">
-                <label className="form-label" htmlFor="t-fee">Base Entry Fee (INR)</label>
+              {/* Toggle option for multiple categories */}
+              <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', margin: '1.5rem 0' }}>
                 <input 
-                  type="number" 
-                  id="t-fee" 
-                  className="form-input" 
-                  placeholder="500"
-                  value={entryFee}
-                  onChange={(e) => setEntryFee(e.target.value)}
-                  required
-                  min="0"
+                  type="checkbox" 
+                  id="t-use-categories" 
+                  checked={useCategories}
+                  onChange={(e) => setUseCategories(e.target.checked)}
+                  style={{ width: '1.25rem', height: '1.25rem', cursor: 'pointer' }}
                 />
+                <label htmlFor="t-use-categories" style={{ fontWeight: '600', cursor: 'pointer', color: 'var(--text-primary)' }}>
+                  Enable Multiple Pricing Categories
+                </label>
               </div>
 
-              <div className="form-group">
-                <label className="form-label" htmlFor="t-category-fees">Category Fees (Optional JSON in Rupees)</label>
-                <textarea 
-                  id="t-category-fees" 
-                  className="form-input" 
-                  style={{ fontFamily: 'monospace', fontSize: '0.85rem', height: '100px', resize: 'vertical' }}
-                  placeholder='e.g. {"Open": 700, "Age Category": 600}'
-                  value={categoryFeesInput}
-                  onChange={(e) => setCategoryFeesInput(e.target.value)}
-                />
-                <small style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
-                  Format: JSON map. Leave empty for single base entry fee.
-                </small>
-              </div>
+              {!useCategories ? (
+                <div className="form-group">
+                  <label className="form-label" htmlFor="t-fee">Base Entry Fee (INR)</label>
+                  <input 
+                    type="number" 
+                    id="t-fee" 
+                    className="form-input" 
+                    placeholder="500"
+                    value={entryFee}
+                    onChange={(e) => setEntryFee(e.target.value)}
+                    required={!useCategories}
+                    min="0"
+                  />
+                </div>
+              ) : (
+                <div style={{ marginBottom: '1.5rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', padding: '1rem', backgroundColor: 'rgba(255,255,255,0.02)' }}>
+                  <h3 style={{ fontSize: '1rem', marginBottom: '1rem', color: 'var(--text-primary)' }}>Payment Categories</h3>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {categories.map((cat, index) => (
+                      <div key={index} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <input 
+                          type="text" 
+                          placeholder="Category Name (e.g. Open)"
+                          value={cat.name}
+                          onChange={(e) => handleCategoryChange(index, 'name', e.target.value)}
+                          className="form-input"
+                          style={{ flex: 2 }}
+                          required={useCategories}
+                        />
+                        <input 
+                          type="number" 
+                          placeholder="Fee (INR)"
+                          value={cat.fee}
+                          onChange={(e) => handleCategoryChange(index, 'fee', e.target.value)}
+                          className="form-input"
+                          style={{ flex: 1 }}
+                          required={useCategories}
+                          min="0"
+                        />
+                        {categories.length > 1 && (
+                          <button 
+                            type="button" 
+                            onClick={() => handleRemoveCategory(index)} 
+                            className="btn btn-secondary"
+                            style={{ padding: '0.5rem', fontSize: '1rem', flexShrink: 0, minWidth: '40px' }}
+                            title="Remove Category"
+                          >
+                            ❌
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
 
-              <div className="form-group">
-                <label className="form-label" htmlFor="t-schema">Dynamic Form Schema (JSON Array)</label>
-                <textarea 
-                  id="t-schema" 
-                  className="form-input" 
-                  style={{ fontFamily: 'monospace', fontSize: '0.85rem', height: '180px', resize: 'vertical' }}
-                  value={formSchema}
-                  onChange={(e) => setFormSchema(e.target.value)}
-                  required
-                />
-              </div>
+                  <button 
+                    type="button" 
+                    onClick={handleAddCategory}
+                    className="btn btn-secondary"
+                    style={{ marginTop: '1rem', width: '100%', fontSize: '0.85rem', padding: '0.5rem' }}
+                  >
+                    ➕ Add Category Row
+                  </button>
+                </div>
+              )}
 
               <button 
                 type="submit" 
