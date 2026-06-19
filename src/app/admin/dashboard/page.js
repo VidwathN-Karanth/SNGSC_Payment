@@ -13,7 +13,8 @@ export default function AdminDashboard() {
   // Tournament Builder Form State
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
-  const [entryFee, setEntryFee] = useState('500'); // Rupees default
+  const [entryFee, setEntryFee] = useState('500'); // Fallback entry fee default
+  const [categoryFeesInput, setCategoryFeesInput] = useState('{\n  "Open": 700,\n  "Age Category": 600\n}');
   const [capacity, setCapacity] = useState('100');
   const [formSchema, setFormSchema] = useState(JSON.stringify([
     { key: 'fideId', label: 'FIDE ID (optional)', type: 'text', required: false },
@@ -68,6 +69,25 @@ export default function AdminDashboard() {
       return;
     }
 
+    let parsedCategoryFees = null;
+    if (categoryFeesInput.trim()) {
+      try {
+        const temp = JSON.parse(categoryFeesInput);
+        const converted = {};
+        for (const key in temp) {
+          const numericVal = parseFloat(temp[key]);
+          if (isNaN(numericVal)) {
+            throw new Error(`Value for "${key}" is not a valid number`);
+          }
+          converted[key] = Math.round(numericVal * 100); // convert to paise
+        }
+        parsedCategoryFees = JSON.stringify(converted);
+      } catch (e) {
+        setError(`Category Fees must be valid JSON: ${e.message}`);
+        return;
+      }
+    }
+
     setCreating(true);
 
     try {
@@ -78,6 +98,7 @@ export default function AdminDashboard() {
           name,
           slug,
           entryFee: Math.round(parseFloat(entryFee) * 100), // convert to paise
+          categoryFees: parsedCategoryFees,
           capacity: parseInt(capacity, 10),
           formSchema,
           isOpen: true
@@ -94,6 +115,7 @@ export default function AdminDashboard() {
       setSlug('');
       setEntryFee('500');
       setCapacity('100');
+      setCategoryFeesInput('{\n  "Open": 700,\n  "Age Category": 600\n}');
       await fetchTournaments();
 
     } catch (err) {
@@ -220,7 +242,7 @@ export default function AdminDashboard() {
               </div>
 
               <div className="form-group">
-                <label className="form-label" htmlFor="t-fee">Entry Fee (INR)</label>
+                <label className="form-label" htmlFor="t-fee">Base Entry Fee (INR)</label>
                 <input 
                   type="number" 
                   id="t-fee" 
@@ -231,6 +253,21 @@ export default function AdminDashboard() {
                   required
                   min="0"
                 />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label" htmlFor="t-category-fees">Category Fees (Optional JSON in Rupees)</label>
+                <textarea 
+                  id="t-category-fees" 
+                  className="form-input" 
+                  style={{ fontFamily: 'monospace', fontSize: '0.85rem', height: '100px', resize: 'vertical' }}
+                  placeholder='e.g. {"Open": 700, "Age Category": 600}'
+                  value={categoryFeesInput}
+                  onChange={(e) => setCategoryFeesInput(e.target.value)}
+                />
+                <small style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
+                  Format: JSON map. Leave empty for single base entry fee.
+                </small>
               </div>
 
               <div className="form-group">
@@ -304,9 +341,19 @@ export default function AdminDashboard() {
                           <td>
                             <strong style={{ display: 'block', color: 'var(--text-primary)' }}>{t.name}</strong>
                             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>/{t.slug}</span>
-                            <span style={{ display: 'block', fontSize: '0.85rem', color: 'var(--primary)', marginTop: '0.25rem', fontWeight: '600' }}>
-                              ₹{(t.entryFee / 100).toFixed(2)}
-                            </span>
+                            {t.categoryFees ? (
+                              <div style={{ fontSize: '0.8rem', color: 'var(--primary)', marginTop: '0.25rem', display: 'flex', flexDirection: 'column', gap: '0.125rem' }}>
+                                {Object.entries(JSON.parse(t.categoryFees)).map(([cat, fee]) => (
+                                  <span key={cat}>
+                                    <strong>{cat}:</strong> ₹{(fee / 100).toFixed(0)}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <span style={{ display: 'block', fontSize: '0.85rem', color: 'var(--primary)', marginTop: '0.25rem', fontWeight: '600' }}>
+                                ₹{(t.entryFee / 100).toFixed(2)}
+                              </span>
+                            )}
                           </td>
                           <td style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
                             {count} / {t.capacity}

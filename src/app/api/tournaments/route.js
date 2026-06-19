@@ -37,7 +37,7 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { name, slug, entryFee, capacity, isOpen, formSchema } = await req.json();
+    const { name, slug, entryFee, categoryFees, capacity, isOpen, formSchema } = await req.json();
 
     if (!name || !slug || !entryFee || !capacity || !formSchema) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -54,6 +54,7 @@ export async function POST(req) {
         name,
         slug,
         entryFee: parseInt(entryFee, 10), // stored in paise
+        categoryFees: categoryFees ? (typeof categoryFees === 'string' ? categoryFees : JSON.stringify(categoryFees)) : null,
         capacity: parseInt(capacity, 10),
         isOpen: isOpen !== undefined ? isOpen : true,
         formSchema: typeof formSchema === 'string' ? formSchema : JSON.stringify(formSchema),

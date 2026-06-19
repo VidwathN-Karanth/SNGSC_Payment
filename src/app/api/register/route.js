@@ -8,7 +8,7 @@ export async function POST(req) {
 
   try {
     const body = await req.json();
-    const { tournamentId, playerName, phone, email, extraFields } = body;
+    const { tournamentId, playerName, phone, email, extraFields, selectedCategory } = body;
 
     // Basic Validation
     if (!tournamentId || !playerName || !phone || !email) {
@@ -41,9 +41,34 @@ export async function POST(req) {
         throw new Error('Tournament is currently closed for registrations');
       }
 
+      // Determine entry fee based on category
+      let finalEntryFee = tournament.entryFee;
+      if (tournament.categoryFees) {
+        try {
+          const feesMap = JSON.parse(tournament.categoryFees);
+          if (!selectedCategory) {
+            throw new Error('Payment category is required');
+          }
+          if (feesMap[selectedCategory] === undefined) {
+            throw new Error(`Invalid payment category: "${selectedCategory}"`);
+          }
+          finalEntryFee = feesMap[selectedCategory];
+        } catch (e) {
+          console.error('Failed parsing categoryFees:', e);
+          if (e.message && e.message.includes('category')) {
+            throw e;
+          }
+        }
+      }
+
       // Validate dynamic form fields
       const schema = JSON.parse(tournament.formSchema);
       const parsedExtra = extraFields || {};
+
+      // Embed the category into extraFields so it shows in CSV exports
+      if (selectedCategory) {
+        parsedExtra.paymentCategory = selectedCategory;
+      }
 
       for (const field of schema) {
         if (field.required && !parsedExtra[field.key]) {
@@ -76,7 +101,7 @@ export async function POST(req) {
           email,
           extraFields: JSON.stringify(parsedExtra),
           orderId,
-          amountPaid: tournament.entryFee, // in paise
+          amountPaid: finalEntryFee, // in paise (dynamically calculated)
         }
       });
 

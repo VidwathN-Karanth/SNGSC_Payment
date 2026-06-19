@@ -6,10 +6,15 @@ import Script from 'next/script';
 export default function RegisterForm({ tournament, cashfreeMode }) {
   const formSchema = JSON.parse(tournament.formSchema || '[]');
 
+  // Parse category fees
+  const categoryFees = tournament.categoryFees ? JSON.parse(tournament.categoryFees) : null;
+  const categoryKeys = categoryFees ? Object.keys(categoryFees) : [];
+
   // Form Fields State
   const [playerName, setPlayerName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState(categoryKeys.length > 0 ? categoryKeys[0] : '');
   const [extraFields, setExtraFields] = useState({});
 
   // UI Flow State
@@ -49,7 +54,8 @@ export default function RegisterForm({ tournament, cashfreeMode }) {
           playerName,
           email,
           phone,
-          extraFields
+          extraFields,
+          selectedCategory
         })
       });
 
@@ -150,7 +156,7 @@ export default function RegisterForm({ tournament, cashfreeMode }) {
         <div className="glass-card" style={{ padding: '1.25rem', display: 'inline-flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.9rem', textAlign: 'left', minWidth: '300px' }}>
           <div>🎫 <strong>Order ID:</strong> {currentOrderId}</div>
           <div>🏆 <strong>Tournament:</strong> {tournament.name}</div>
-          <div>💰 <strong>Amount Paid:</strong> ₹{(tournament.entryFee / 100).toFixed(2)}</div>
+          <div>💰 <strong>Amount Paid:</strong> ₹{categoryFees && selectedCategory ? (categoryFees[selectedCategory] / 100).toFixed(2) : (tournament.entryFee / 100).toFixed(2)}</div>
         </div>
         <div style={{ marginTop: '2.5rem' }}>
           <a href="/" className="btn btn-primary">Go to Homepage</a>
@@ -199,6 +205,27 @@ export default function RegisterForm({ tournament, cashfreeMode }) {
       )}
 
       <form onSubmit={handleSubmit}>
+        {/* Payment Category Selector */}
+        {categoryFees && (
+          <div className="form-group">
+            <label className="form-label" htmlFor="selectedCategory">Payment Category</label>
+            <select
+              id="selectedCategory"
+              className="form-select"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              disabled={status !== 'idle'}
+              required
+            >
+              {categoryKeys.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat} — ₹{(categoryFees[cat] / 100).toFixed(2)}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
         {/* Player Name */}
         <div className="form-group">
           <label className="form-label" htmlFor="playerName">Full Name</label>
@@ -294,7 +321,7 @@ export default function RegisterForm({ tournament, cashfreeMode }) {
             ) : status === 'checkout' ? (
               'Opening Checkout Window...'
             ) : (
-              `Proceed to Payment — ₹${(tournament.entryFee / 100).toFixed(2)}`
+              `Proceed to Payment — ₹${categoryFees && selectedCategory ? (categoryFees[selectedCategory] / 100).toFixed(2) : (tournament.entryFee / 100).toFixed(2)}`
             )}
           </button>
           {!sdkLoaded && (

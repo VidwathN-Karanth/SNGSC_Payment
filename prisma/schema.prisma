@@ -12,7 +12,8 @@ model Tournament {
   id            String         @id @default(uuid())
   name          String
   slug          String         @unique
-  entryFee      Int            // In paise (e.g. 50000 paise = 500.00 INR)
+  entryFee      Int            // Fallback entry fee in paise
+  categoryFees  String?        // JSON string mapping categories to fees in paise, e.g. {"Open": 70000, "Age Category": 60000}
   capacity      Int            // Max player limit
   isOpen        Boolean        @default(true)
   formSchema    String         // JSON string for dynamic fields config
